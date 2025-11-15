@@ -3,9 +3,9 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import AuthRoutes from "./routes/AuthRoutes";
+import MessageRoutes from "./routes/MessageRoutes";
 
 dotenv.config();
-
 const app = express();
 const PORT = 8080;
 
@@ -15,6 +15,9 @@ app.use(express.json());
 
 // Auth routes
 app.use("/api/auth", AuthRoutes);
+
+// Message Routes
+app.use("/api/message", MessageRoutes);
 
 // Bind port immediately
 app.listen(PORT, () => {
