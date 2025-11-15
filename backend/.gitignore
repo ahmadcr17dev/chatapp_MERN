@@ -12,7 +12,7 @@ build/
 .env.development
 
 # JsonWebToken
-.jsonwebtoken
+/config/jsonwebtoken
 
 # Logs
 logs
