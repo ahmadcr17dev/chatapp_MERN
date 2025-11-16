@@ -53,17 +53,21 @@ const Login = async (req: Request, res: Response) => {
         const { username, password } = req.body;
         const existedUser = await User.findOne({ username });
         if (!existedUser) {
-            return res.status(500).send({ success: false, message: "User not found" });
+            return res.status(400).send({ success: false, message: "User not found" });
         }
         const comparePassword = bcrypt.compareSync(password, existedUser.password || "");
         if (!comparePassword) {
-            return res.status(500).send({ success: false, message: "Password not matched" });
+            return res.status(400).send({ success: false, message: "Password not matched" });
         }
         jsonwebtoken(existedUser._id.toString(), res);
-        res.status(200).send({
-            _id: existedUser.id,
-            username: existedUser.email,
-            message: "Login Successfully"
+        return res.status(200).json({
+            success: true,
+            message: "Login Successfully",
+            user: {
+                _id: existedUser.id,
+                username: existedUser.username,
+                email: existedUser.email
+            }
         })
     } catch (error) {
         console.log("Error: ", error);
