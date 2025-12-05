@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import AuthRoutes from "./routes/AuthRoutes";
 import MessageRoutes from "./routes/MessageRoutes";
+import UserRoutes from "./routes/UserRoutes";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -20,6 +21,9 @@ app.use("/api/auth", AuthRoutes);
 
 // Message Routes
 app.use("/api/message", MessageRoutes);
+
+// Search Routes
+app.use("/api/user", UserRoutes);
 
 // Bind port immediately
 app.listen(PORT, () => {
