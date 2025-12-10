@@ -1,15 +1,17 @@
-import React from 'react';
-import {Button} from '@mui/material';
+import Login from './components/Login';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Register from './components/Register';
 
 const App = () => {
   return (
     <>
-      <h1>
-        This is MERN with TypeScript
-      </h1>
-      <Button variant="contained">
-        Register
-      </Button>
+    {/* <Register /> */}
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path='/' element={<Register />} />
+        </Routes>
+      </BrowserRouter>
     </>
   )
 }
