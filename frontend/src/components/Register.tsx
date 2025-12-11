@@ -1,11 +1,19 @@
 import { NavLink } from "react-router-dom";
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import Confetti from 'react-confetti';
 
 const Register = () => {
+    const navigate = useNavigate();
     const { register } = useAuth();
+    const [showconfetti, setshowconfetti] = useState(false);
+    const [windowsize, setwindowsize] = useState({
+        width: window.innerWidth,
+        height: window.innerHeight
+    })
     const [form, setform] = useState({
         fullname: "",
         username: "",
@@ -16,6 +24,17 @@ const Register = () => {
         phone: ""
     });
     const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+    useEffect(() => {
+        const HandleResize = () => {
+            setwindowsize({
+                height: window.innerHeight,
+                width: window.innerWidth
+            })
+        }
+        window.addEventListener("resize", HandleResize);
+        return () => window.removeEventListener("resize", HandleResize);
+    }, []);
 
     const HandleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setform({ ...form, [e.target.name]: e.target.value });
@@ -34,6 +53,11 @@ const Register = () => {
         try {
             await register(form);
             setMessage({ text: "Account Created Successfully", type: "success" });
+            setshowconfetti(true);
+            setTimeout(() => {
+                setshowconfetti(false);
+                navigate("/login");
+            }, 10000);
             setform({
                 fullname: "",
                 username: "",
@@ -237,6 +261,12 @@ const Register = () => {
                     </NavLink>
                 </p>
             </div>
+
+            {/*  Confetti Effect */}
+            {showconfetti && (
+                <Confetti width={windowsize.width} height={windowsize.height} numberOfPieces={300} />
+            )}
+
         </section>
     );
 };

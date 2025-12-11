@@ -1,10 +1,48 @@
 import { NavLink } from "react-router-dom";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import { useEffect, useState } from "react";
+import { SkeletonTheme } from "react-loading-skeleton";
 
 const Login = () => {
+    const [loading, setloading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setloading(false), 3000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (loading) {
+        return (
+            <SkeletonTheme
+                baseColor="gray"        // soft gray
+                highlightColor="#F3F4F6"   // subtle shimmer
+            >
+                <section className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+                    <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 space-y-6">
+
+                        <Skeleton height={32} width={180} className="mx-auto" />
+                        <Skeleton height={20} width={220} className="mx-auto" />
+
+                        <Skeleton height={18} width={120} />
+                        <Skeleton height={48} />
+
+                        <Skeleton height={18} width={120} />
+                        <Skeleton height={48} />
+
+                        <Skeleton height={50} />
+
+                        <Skeleton height={18} width={200} className="mx-auto mt-4" />
+
+                    </div>
+                </section>
+            </SkeletonTheme>
+        );
+    }
+
     return (
         <section className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
             <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8">
-                {/* Header */}
                 <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">
                     Welcome Back
                 </h2>
@@ -12,7 +50,6 @@ const Login = () => {
                     Log in to continue chatting
                 </p>
 
-                {/* Form */}
                 <form className="space-y-5">
                     {/* Email */}
                     <div>
@@ -57,7 +94,6 @@ const Login = () => {
                     </button>
                 </form>
 
-                {/* Bottom Link */}
                 <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
                     Don’t have an account?{" "}
                     <NavLink
