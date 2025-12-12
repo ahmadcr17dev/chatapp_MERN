@@ -13,7 +13,7 @@ interface User {
 
 interface AuthContextType {
     user: User | null;
-    register: (data: any) => Promise<void>;
+    register: (data: any) => Promise<{ success: boolean; message: string }>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -26,11 +26,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const register = async (data: any) => {
         try {
             const res = await axios.post("http://localhost:8080/api/auth/register", data);
-            setUser(res.data); // backend sends the user object
-            localStorage.setItem("user", JSON.stringify(res.data));
-            return res.data;
+
+            // Throw if backend responds with success: false
+            if (res.data.success === false) {
+                throw new Error(res.data.message);
+            }
+
+            return res.data; // success
         } catch (err: any) {
-            alert(err.response?.data?.message || "Registration failed");
+            // Network or Axios error
+            throw new Error(err.response?.data?.message || "Registration failed");
         }
     };
 

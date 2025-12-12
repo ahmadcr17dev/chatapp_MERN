@@ -9,11 +9,13 @@ import Confetti from 'react-confetti';
 const Register = () => {
     const navigate = useNavigate();
     const { register } = useAuth();
+
     const [showconfetti, setshowconfetti] = useState(false);
     const [windowsize, setwindowsize] = useState({
         width: window.innerWidth,
         height: window.innerHeight
-    })
+    });
+
     const [form, setform] = useState({
         fullname: "",
         username: "",
@@ -23,41 +25,68 @@ const Register = () => {
         gender: "",
         phone: ""
     });
+
     const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
+    // Resize listener
     useEffect(() => {
         const HandleResize = () => {
             setwindowsize({
                 height: window.innerHeight,
                 width: window.innerWidth
-            })
-        }
+            });
+        };
         window.addEventListener("resize", HandleResize);
         return () => window.removeEventListener("resize", HandleResize);
     }, []);
 
+    // Disappear messages after some seconds
+    useEffect(() => {
+        if (!message) return;
+        const timer = setTimeout(() => {
+            setMessage(null);
+        }, 3000);
+        return () => clearInterval(timer);
+    }, [message])
+
+    // Form input handler
     const HandleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setform({ ...form, [e.target.name]: e.target.value });
-    }
+    };
 
+    // Phone input handler
     const PhoneHandleChange = (phone: string) => {
         setform({ ...form, phone });
-    }
+    };
 
+    // Submit Handler
     const HandleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // username must be in lowercase
+        if(form.username !== form.username.toLowerCase()){
+            setMessage({ text: "Username must be in lowercase", type: "error" });
+            return;
+        }
+
+        // match password
         if (form.password !== form.confirmpassword) {
             setMessage({ text: "Password & Confirm Password must be same", type: "error" });
             return;
         }
+
         try {
-            await register(form);
-            setMessage({ text: "Account Created Successfully", type: "success" });
+            const result = await register(form); // will throw on backend error
+
+            // Success message
+            setMessage({ text: result.message || "Account Created Successfully", type: "success" });
             setshowconfetti(true);
+
             setTimeout(() => {
                 setshowconfetti(false);
                 navigate("/login");
-            }, 10000);
+            }, 5000);
+
             setform({
                 fullname: "",
                 username: "",
@@ -66,15 +95,16 @@ const Register = () => {
                 confirmpassword: "",
                 gender: "",
                 phone: ""
-            })
+            });
+
         } catch (error: any) {
             setMessage({ text: error.message, type: "error" });
         }
-    }
+    };
 
     return (
         <section className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-10">
-            <div className="w-full max-w-5xl bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8 md:p-10">
+            <div className="w-full max-w-5xl bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 sm:p-8 md:p-10">
 
                 {/* Header */}
                 <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">
@@ -85,39 +115,31 @@ const Register = () => {
                 </p>
 
                 {/* FORM START */}
-                <form onSubmit={HandleSubmit}>
+                <form onSubmit={HandleSubmit} className="space-y-4">
 
-                    <div className="flex flex-row justify-between gap-4 my-2">
-                        {/* Full Name */}
+                    {/* Full Name + Username */}
+                    <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Full Name
                             </label>
                             <input
                                 type="text"
-                                className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700
-                            border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white
-                            placeholder:text-gray-400 dark:placeholder-gray-500
-                            focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                                 placeholder="John Doe"
                                 required
                                 name="fullname"
                                 value={form.fullname}
                                 onChange={HandleChange}
+                                className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                             />
                         </div>
 
-                        {/* Username */}
                         <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Username
                             </label>
                             <input
                                 type="text"
-                                className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700
-                            border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white
-                            placeholder:text-gray-400 dark:placeholder-gray-500
-                            focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                                 placeholder="ahmad123"
                                 required
                                 name="username"
@@ -125,43 +147,38 @@ const Register = () => {
                                 onChange={HandleChange}
                                 minLength={7}
                                 maxLength={15}
+                                className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                             />
                         </div>
                     </div>
 
-                    <div className="flex flex-row justify-between gap-4 my-2">
-                        {/* Email */}
+                    {/* Email + Gender + Phone */}
+                    <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Email
                             </label>
                             <input
                                 type="email"
-                                className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 
-                            border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white
-                            placeholder:text-gray-400 dark:placeholder-gray-500
-                            focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                                 placeholder="you@example.com"
                                 required
                                 name="email"
                                 value={form.email}
                                 onChange={HandleChange}
+                                className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                             />
                         </div>
 
-                        {/* Gender */}
                         <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Gender
                             </label>
                             <select
-                                className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 
-                            border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white
-                            focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                                 required
                                 name="gender"
                                 value={form.gender}
                                 onChange={HandleChange}
+                                className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                             >
                                 <option value="">Select gender</option>
                                 <option value="male">Male</option>
@@ -170,8 +187,7 @@ const Register = () => {
                             </select>
                         </div>
 
-                        {/* Phone */}
-                        <div className="flex flex-col flex-1">
+                        <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Phone
                             </label>
@@ -179,7 +195,7 @@ const Register = () => {
                                 <PhoneInput
                                     forceDialCode
                                     defaultCountry="pk"
-                                    inputClassName="w-full bg-transparent text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder-gray-500 px-4 py-2.5 outline-none"
+                                    inputClassName="w-full bg-transparent text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 px-4 py-2.5 outline-none"
                                     countrySelectorStyleProps={{
                                         buttonClassName: "bg-gray-100 dark:bg-gray-700 border-none rounded-l-lg px-2",
                                         dropdownArrowClassName: "bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600",
@@ -192,18 +208,14 @@ const Register = () => {
                         </div>
                     </div>
 
-                    <div className="flex flex-row justify-between gap-4 my-2">
-                        {/* Password */}
+                    {/* Password + Confirm Password */}
+                    <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Password
                             </label>
                             <input
                                 type="password"
-                                className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700
-                            border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white
-                            placeholder:text-gray-400 dark:placeholder-gray-500
-                            focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                                 placeholder="••••••••"
                                 required
                                 name="password"
@@ -211,46 +223,40 @@ const Register = () => {
                                 onChange={HandleChange}
                                 minLength={8}
                                 maxLength={15}
+                                className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                             />
                         </div>
 
-                        {/* Confirm Password */}
                         <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Confirm Password
                             </label>
                             <input
                                 type="password"
-                                className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700
-                            border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white
-                            placeholder:text-gray-400 dark:placeholder-gray-500
-                            focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                                 placeholder="••••••••"
                                 required
                                 name="confirmpassword"
                                 value={form.confirmpassword}
                                 onChange={HandleChange}
+                                className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
                             />
                         </div>
                     </div>
-                    {/* Error Message */}
+
+                    {/* Error/Success Message */}
                     {message && (
-                        <div className={`col-span-1 md:col-span-3 mt-4 font-medium ${message.type === "success" ? "text-green-600" : "text-red-500"}`}>
+                        <div className={message.type === "success" ? "text-green-500 font-medium" : "text-red-500 font-medium"}>
                             {message.text}
                         </div>
                     )}
 
                     {/* Submit Button */}
-                    <div className="col-span-1 md:col-span-3">
-                        <button
-                            type="submit"
-                            className="mt-4 w-full py-3 bg-teal-600 hover:bg-teal-700 text-white
-                            rounded-lg text-lg font-semibold shadow-md hover:shadow-lg transition hover:cursor-pointer"
-                        >
-                            Create Account
-                        </button>
-                    </div>
-
+                    <button
+                        type="submit"
+                        className="mt-4 w-full py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-lg font-semibold shadow-md hover:shadow-lg transition hover:cursor-pointer"
+                    >
+                        Create Account
+                    </button>
                 </form>
 
                 {/* Login Link */}
@@ -262,13 +268,12 @@ const Register = () => {
                 </p>
             </div>
 
-            {/*  Confetti Effect */}
+            {/* Confetti Effect */}
             {showconfetti && (
                 <Confetti width={windowsize.width} height={windowsize.height} numberOfPieces={300} />
             )}
-
         </section>
-    );
+    )
 };
 
 export default Register;
