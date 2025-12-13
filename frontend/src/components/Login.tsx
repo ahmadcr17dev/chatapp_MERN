@@ -1,39 +1,89 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useEffect, useState } from "react";
 import { SkeletonTheme } from "react-loading-skeleton";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
     const [loading, setloading] = useState(true);
+    const { login } = useAuth();
+    const navigate = useNavigate();
+    const [form, setform] = useState({
+        username: "",
+        password: ""
+    });
+    type messagetype = "success" | "error";
+    const [message, setmessage] = useState<{
+        text: string;
+        type: messagetype;
+    } | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => setloading(false), 3000);
         return () => clearTimeout(timer);
     }, []);
 
+    const HandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setform({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const HandleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        setmessage(null); // clear old error
+
+        try {
+            const response = await login(form);
+
+            setmessage({
+                text: response.message,
+                type: "success",
+            });
+
+            setTimeout(() => {
+                navigate("/home"); // absolute path
+            }, 1500);
+
+        } catch (error: any) {
+            setmessage({
+                text: error.message,
+                type: "error",
+            });
+        }
+    };
+
     if (loading) {
         return (
             <SkeletonTheme
-                baseColor="gray"        // soft gray
-                highlightColor="#F3F4F6"   // subtle shimmer
+                baseColor="#1F2937"        // Tailwind gray-200
+                highlightColor="#374151"   // Tailwind gray-100
             >
                 <section className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
                     <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 space-y-6">
+                        {/* Title Skeleton */}
+                        <Skeleton height={32} width={180} className="mx-auto rounded-md" />
 
-                        <Skeleton height={32} width={180} className="mx-auto" />
-                        <Skeleton height={20} width={220} className="mx-auto" />
+                        {/* Subtitle Skeleton */}
+                        <Skeleton height={20} width={220} className="mx-auto rounded-md" />
 
-                        <Skeleton height={18} width={120} />
-                        <Skeleton height={48} />
+                        {/* Username Input */}
+                        <div className="space-y-2">
+                            <Skeleton height={18} width={120} className="rounded-md" />
+                            <Skeleton height={48} className="rounded-lg" />
+                        </div>
 
-                        <Skeleton height={18} width={120} />
-                        <Skeleton height={48} />
+                        {/* Password Input */}
+                        <div className="space-y-2">
+                            <Skeleton height={18} width={120} className="rounded-md" />
+                            <Skeleton height={48} className="rounded-lg" />
+                        </div>
 
-                        <Skeleton height={50} />
+                        {/* Login Button */}
+                        <Skeleton height={50} className="rounded-lg mt-4" />
 
-                        <Skeleton height={18} width={200} className="mx-auto mt-4" />
-
+                        {/* Footer Link */}
+                        <Skeleton height={18} width={200} className="mx-auto mt-6 rounded-md" />
                     </div>
                 </section>
             </SkeletonTheme>
@@ -50,21 +100,24 @@ const Login = () => {
                     Log in to continue chatting
                 </p>
 
-                <form className="space-y-5">
+                <form className="space-y-5" onSubmit={HandleSubmit}>
                     {/* Email */}
                     <div>
                         <label
                             htmlFor="email"
                             className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
-                            Email Address
+                            Username
                         </label>
                         <input
-                            type="email"
-                            id="email"
-                            placeholder="you@example.com"
+                            type="text"
+                            id="username"
+                            placeholder="user123"
                             className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
                             required
+                            name="username"
+                            value={form.username}
+                            onChange={HandleChange}
                         />
                     </div>
 
@@ -82,8 +135,24 @@ const Login = () => {
                             placeholder="••••••••"
                             className="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
                             required
+                            name="password"
+                            value={form.password}
+                            onChange={HandleChange}
                         />
                     </div>
+
+                    {/* error message */}
+                    {message && (
+                        <div
+                            className={
+                                message.type === "success"
+                                    ? "text-green-500 font-medium"
+                                    : "text-red-500 font-medium"
+                            }
+                        >
+                            {message.text}
+                        </div>
+                    )}
 
                     {/* Submit Button */}
                     <button

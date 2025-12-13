@@ -5,10 +5,13 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Confetti from 'react-confetti';
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const Register = () => {
     const navigate = useNavigate();
     const { register } = useAuth();
+    const [loading, setloading] = useState(true);
 
     const [showconfetti, setshowconfetti] = useState(false);
     const [windowsize, setwindowsize] = useState({
@@ -27,6 +30,11 @@ const Register = () => {
     });
 
     const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+    
+    useEffect(() => {
+        const timer = setTimeout(() => setloading(false), 3000);
+        return () => clearTimeout(timer);
+    }, []);
 
     // Resize listener
     useEffect(() => {
@@ -39,6 +47,7 @@ const Register = () => {
         window.addEventListener("resize", HandleResize);
         return () => window.removeEventListener("resize", HandleResize);
     }, []);
+
 
     // Disappear messages after some seconds
     useEffect(() => {
@@ -64,7 +73,7 @@ const Register = () => {
         e.preventDefault();
 
         // username must be in lowercase
-        if(form.username !== form.username.toLowerCase()){
+        if (form.username !== form.username.toLowerCase()) {
             setMessage({ text: "Username must be in lowercase", type: "error" });
             return;
         }
@@ -97,10 +106,78 @@ const Register = () => {
                 phone: ""
             });
 
-        } catch (error: any) {
-            setMessage({ text: error.message, type: "error" });
+        } catch (err: any) {
+            setMessage({ text: err.message, type: "error" });
         }
     };
+
+    if (loading) {
+        return (
+            <SkeletonTheme
+                baseColor="#1F2937"        // Tailwind gray-200
+                highlightColor="#374151"   // Tailwind gray-100
+            >
+                <section className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-10">
+                    <div className="w-full max-w-5xl bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8 md:p-10 space-y-6">
+
+                        {/* Header */}
+                        <Skeleton height={32} width={200} className="mx-auto rounded-md" />
+                        <Skeleton height={20} width={240} className="mx-auto rounded-md" />
+
+                        {/* Full Name & Username */}
+                        <div className="flex flex-col md:flex-row gap-4 my-2">
+                            <div className="flex-1 space-y-2">
+                                <Skeleton height={18} width={120} className="rounded-md" />
+                                <Skeleton height={48} className="rounded-lg" />
+                            </div>
+                            <div className="flex-1 space-y-2">
+                                <Skeleton height={18} width={120} className="rounded-md" />
+                                <Skeleton height={48} className="rounded-lg" />
+                            </div>
+                        </div>
+
+                        {/* Email & Gender & Phone */}
+                        <div className="flex flex-col md:flex-row gap-4 my-2">
+                            <div className="flex-1 space-y-2">
+                                <Skeleton height={18} width={120} className="rounded-md" />
+                                <Skeleton height={48} className="rounded-lg" />
+                            </div>
+                            <div className="flex-1 space-y-2">
+                                <Skeleton height={18} width={120} className="rounded-md" />
+                                <Skeleton height={48} className="rounded-lg" />
+                            </div>
+                            <div className="flex-1 space-y-2">
+                                <Skeleton height={18} width={120} className="rounded-md" />
+                                <Skeleton height={48} className="rounded-lg" />
+                            </div>
+                        </div>
+
+                        {/* Password & Confirm Password */}
+                        <div className="flex flex-col md:flex-row gap-4 my-2">
+                            <div className="flex-1 space-y-2">
+                                <Skeleton height={18} width={140} className="rounded-md" />
+                                <Skeleton height={48} className="rounded-lg" />
+                            </div>
+                            <div className="flex-1 space-y-2">
+                                <Skeleton height={18} width={160} className="rounded-md" />
+                                <Skeleton height={48} className="rounded-lg" />
+                            </div>
+                        </div>
+
+                        {/* Error/Message */}
+                        <Skeleton height={20} width={200} className="mx-auto mt-2 rounded-md" />
+
+                        {/* Submit Button */}
+                        <Skeleton height={50} className="rounded-lg mt-4" />
+
+                        {/* Login Link */}
+                        <Skeleton height={18} width={180} className="mx-auto mt-6 rounded-md" />
+
+                    </div>
+                </section>
+            </SkeletonTheme>
+        );
+    }
 
     return (
         <section className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-10">
