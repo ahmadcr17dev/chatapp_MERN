@@ -2,6 +2,7 @@ import Login from './components/Login';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Register from './components/Register';
 import Home from './components/Home';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
   return (
@@ -10,7 +11,9 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path='/' element={<Register />} />
-          <Route path="/home" element={<Home />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path='/home' element={<Home />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </>
