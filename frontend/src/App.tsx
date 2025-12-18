@@ -1,7 +1,7 @@
 import Login from './components/Login';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Register from './components/Register';
-import Home from './components/Home';
+import ChatPage from './components/ChatPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
@@ -12,7 +12,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path='/' element={<Register />} />
           <Route element={<ProtectedRoute />}>
-            <Route path='/home' element={<Home />} />
+            <Route path='/chatpage' element={<ChatPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

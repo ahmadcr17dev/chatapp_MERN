@@ -42,7 +42,7 @@ const Login = () => {
             });
 
             setTimeout(() => {
-                navigate("/home"); // absolute path
+                navigate("/chatpage"); // absolute path
             }, 1500);
 
         } catch (error: any) {
