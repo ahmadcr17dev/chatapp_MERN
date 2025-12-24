@@ -1,5 +1,6 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from "react";
 import axios from "axios";
+import toast from 'react-hot-toast';
 
 interface User {
     _id: string;
@@ -66,9 +67,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return res.data;
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem("user");
+    const logout = async () => {
+        try {
+            const response = await axios.post(
+                import.meta.env.VITE_LOGOUT_KEY,
+                {},
+                { withCredentials: true }
+            );
+
+            // Success
+            toast.success(response.data?.message || "Logged out successfully");
+
+            setTimeout(() => {
+                setUser(null);
+                localStorage.removeItem("user");
+            }, 1500)
+
+        } catch (error: any) {
+            toast.error(
+                error.response?.data?.message || "Logout failed"
+            );
+            console.log("Error in Logout:", error);
+        }
     };
 
     return (

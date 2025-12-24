@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Register from './components/Register';
 import ChatPage from './components/ChatPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
           </Route>
         </Routes>
       </BrowserRouter>
+      <Toaster />
     </>
   )
 }

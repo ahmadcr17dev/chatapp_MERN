@@ -53,8 +53,8 @@ const Register = async (req: Request, res: Response) => {
 
         await newUser.save();
 
-        res.status(201).send({
-            status: true,
+        res.status(201).json({
+            success: true,
             message: "User Registered Successfully",
             user: {
                 _id: newUser.id,
@@ -78,7 +78,7 @@ const Register = async (req: Request, res: Response) => {
             });
         }
 
-        return res.status(500).send({ status: false, message: "Internal Server Error" });
+        return res.status(500).json({ status: false, message: "Internal Server Error" });
     }
 };
 
@@ -87,11 +87,11 @@ const Login = async (req: Request, res: Response) => {
         const { username, password } = req.body;
         const existedUser = await User.findOne({ username });
         if (!existedUser) {
-            return res.status(400).send({ success: false, message: "User not found" });
+            return res.status(400).json({ success: false, message: "User not found" });
         }
         const comparePassword = bcrypt.compareSync(password, existedUser.password || "");
         if (!comparePassword) {
-            return res.status(400).send({ success: false, message: "Password not matched" });
+            return res.status(400).json({ success: false, message: "Password not matched" });
         }
         jsonwebtoken(existedUser._id.toString(), res);
         return res.status(200).json({
@@ -100,12 +100,16 @@ const Login = async (req: Request, res: Response) => {
             user: {
                 _id: existedUser.id,
                 username: existedUser.username,
-                email: existedUser.email
+                email: existedUser.email,
+                gender: existedUser.gender,
+                profilepic: (existedUser.gender === "male"
+                    ? `https://avatar.iran.liara.run/public/boy?username=${username}`
+                    : `https://avatar.iran.liara.run/public/girl?username=${username}`)
             }
         })
     } catch (error) {
         console.log("Error: ", error);
-        return res.status(500).send({ success: false, message: "Internal Server Error" });
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 }
 
@@ -114,10 +118,10 @@ const Logout = async (req: Request, res: Response) => {
         res.cookie("jwt", "", {
             maxAge: 0
         })
-        res.status(200).send({ success: true, message: "User Logout Successfully" });
+        res.status(200).json({ success: true, message: "User Logout Successfully" });
     } catch (error) {
         console.log("Error: ", error);
-        return res.status(500).send({ success: false, message: "Internal Server Error" });
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 }
 
