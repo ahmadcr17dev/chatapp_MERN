@@ -2,6 +2,7 @@ import User from "../models/UserModel";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jsonwebtoken from "../config/jsonwebtoken";
+import GenerateAvatar from "../config/GenerateAvatar";
 
 const Register = async (req: Request, res: Response) => {
     try {
@@ -35,11 +36,8 @@ const Register = async (req: Request, res: Response) => {
         // encrypt password
         const hashPassword = bcrypt.hashSync(password, 10);
 
-        const avatar =
-            profilepic ||
-            (gender === "male"
-                ? `https://avatar.iran.liara.run/public/boy?username=${username}`
-                : `https://avatar.iran.liara.run/public/girl?username=${username}`);
+        // generate avatar
+        const avatar = profilepic || GenerateAvatar(username, gender);
 
         const newUser = new User({
             fullname,
@@ -86,6 +84,7 @@ const Login = async (req: Request, res: Response) => {
     try {
         const { username, password } = req.body;
         const existedUser = await User.findOne({ username });
+
         if (!existedUser) {
             return res.status(400).json({ success: false, message: "User not found" });
         }
@@ -93,6 +92,7 @@ const Login = async (req: Request, res: Response) => {
         if (!comparePassword) {
             return res.status(400).json({ success: false, message: "Password not matched" });
         }
+
         jsonwebtoken(existedUser._id.toString(), res);
         return res.status(200).json({
             success: true,
@@ -102,9 +102,7 @@ const Login = async (req: Request, res: Response) => {
                 username: existedUser.username,
                 email: existedUser.email,
                 gender: existedUser.gender,
-                profilepic: (existedUser.gender === "male"
-                    ? `https://avatar.iran.liara.run/public/boy?username=${username}`
-                    : `https://avatar.iran.liara.run/public/girl?username=${username}`)
+                profilepic: existedUser.profilepic
             }
         })
     } catch (error) {

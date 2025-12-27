@@ -1,29 +1,60 @@
-import React from "react";
-import { useAuth } from "../context/AuthContext"; // make sure your context exists
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+
+interface ChatUser {
+    _id: string;
+    username: string;
+    gender: "male" | "female";
+    profilepic?: string;
+}
 
 const ChatHeader: React.FC = () => {
-    const { user } = useAuth(); // logged-in user from context
+    const [loaded, setLoaded] = useState(false);
+    const [chatUser, setChatUser] = useState<ChatUser | null>(null);
+    const { user } = useAuth();
+    if (!user) return null;
 
-    if (!user) return null; // user not logged in or loading
+    const loadActiveChatUser = () => {
+        const stored = localStorage.getItem("activeChatUser");
+        setChatUser(stored ? JSON.parse(stored) : null);
+    };
 
-    // avatar fallback based on gender
-    const avatarUrl =
-        user.profilepic ||
-        (user.gender === "male"
-            ? `https://avatar.iran.liara.run/public/boy?username=${user.username}`
-            : `https://avatar.iran.liara.run/public/girl?username=${user.username}`);
+    useEffect(() => {
+        loadActiveChatUser(); // initial load
+
+        // listen for custom event when user clicks a new chat
+        window.addEventListener("activeChatChanged", loadActiveChatUser);
+
+        return () => {
+            window.removeEventListener("activeChatChanged", loadActiveChatUser);
+        };
+    }, [user]);
+
+    if (!chatUser) {
+        return (
+            <div className="p-4 border-b text-gray-500">
+                Select a chat to start messaging
+            </div>
+        );
+    }
+
+    const avatar =
+        chatUser.profilepic ||
+        (chatUser.gender === "female"
+            ? `https://avatar.iran.liara.run/public/girl?username=${chatUser.username}`
+            : `https://avatar.iran.liara.run/public/boy?username=${chatUser.username}`);
 
     return (
-        <div className="flex items-center gap-3 p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="flex items-center gap-3 p-4 border-b bg-gray-700">
             <img
-                src={avatarUrl}
-                className="w-10 h-10 rounded-full"
+                src={avatar}
+                onLoad={() => setLoaded(true)}
+                className={`w-10 h-10 rounded-full transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"
+                    }`}
                 alt="avatar"
             />
             <div>
-                <p className="font-semibold text-gray-800 dark:text-white">
-                    {user.username}
-                </p>
+                <p className="font-semibold text-white">{chatUser.username}</p>
                 <p className="text-xs text-green-500">online</p>
             </div>
         </div>

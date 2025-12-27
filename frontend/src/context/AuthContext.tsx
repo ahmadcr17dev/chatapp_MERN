@@ -51,20 +51,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const login = async (data: { username: string; password: string }) => {
-        const res = await axios.post(
-            import.meta.env.VITE_LOGIN_KEY,
-            data,
-            { withCredentials: true }
-        );
+        try {
+            const res = await axios.post(
+                import.meta.env.VITE_LOGIN_KEY,
+                data,
+                { withCredentials: true }
+            );
 
-        if (!res.data.success) {
-            throw new Error(res.data.message);
+            setUser(res.data.user);
+            localStorage.setItem("user", JSON.stringify(res.data.user));
+
+            return res.data;
+
+        } catch (error: any) {
+            // 🔥 THIS IS THE FIX
+            const message =
+                error.response?.data?.message ||
+                "Invalid username or password";
+
+            throw new Error(message);
         }
-
-        setUser(res.data.user);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-
-        return res.data;
     };
 
     const logout = async () => {
